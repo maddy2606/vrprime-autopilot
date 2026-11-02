@@ -119,5 +119,84 @@
     "closedAt": {},
     "events": []
   },
-  "lastRunAt": "2026-11-02T14:26:17.158Z"
+  "lastRunAt": "2026-11-02T14:30:51.362Z",
+  "deactivations": {
+    "undo-first-run-2026-11-02": {
+      "at": "2026-11-02T14:30:51.362Z",
+      "deactivated": [
+        {
+          "sku": "CARIN1",
+          "title": "VRPRIME Car Interior Cleaner | Car All Interior Surfaces Dashboard, Seat, Door Cleaning Kit | Leather, Plastic and Fabrics |Removes Tough Stains Vehicle Interior Cleaner (500 ml)"
+        },
+        {
+          "sku": "INTERIOR2",
+          "title": "VRPRIME Car Interior Cleaner Spray For Dashboard, Seats & All Interior Surfaces Leather, Plastic & Fabric | AC Vents Tough Stain Cleaner Vehicle Interior Cleaner (500 ml)"
+        },
+        {
+          "sku": "VAC1",
+          "title": "VRPRIME Vacuum Compression Bags with Free Pump | Save Space for Clothes, Blankets, Travel Storage Vacuum Bags (Pack of 5)"
+        },
+        {
+          "sku": "VRVACX",
+          "title": "VRPRIME Vacuum Compression Bags with Pump |Space Saving 1 Large, 2 Medium, 2 Small Travel Storage Vacuum Bags (Pack of 5)"
+        },
+        {
+          "sku": "VACMAP1",
+          "title": "RMB Vacuum Bag, Space Saver Compression Sealer Bags with Manual Pump Travel Storage Vacuum Bags (Pack of 5)"
+        },
+        {
+          "sku": "VACMAP3",
+          "title": "Belanto 5 Pack Vacuum Compression Storage Bags With 1 Pump,Space Saver Vacuum Sealer Bag High Volume Storage Vacuum Bags, Travel Storage Vacuum Bags (Pack of 5)"
+        },
+        {
+          "sku": "VACMAP4",
+          "title": "Coozico Vacuum Compression Storage Bags With Hand Pump - Jumbo, 5-Pack Travel Storage Vacuum Bags (Pack of 5)"
+        },
+        {
+          "sku": "VACMAP5",
+          "title": "Anayo Space Saver Ziplock Bags for Clothes with Hand Pump 2 Medium 2 Large 1 Jumbo Travel Storage Vacuum Bags (Pack of 5)"
+        },
+        {
+          "sku": "VACMAP6",
+          "title": "MAITRI ENTERPRISE 5Pack Vacuum Compression Storage Bags With Pump,Space Saver Sealer Bag M496 Travel Storage Vacuum Bags (Pack of 5)"
+        },
+        {
+          "sku": "CARNZ",
+          "title": "VRPRIME Car Interior Cleaner & Dashboard Polish Spray Shine & Protect for Leather, Plastic, Seats & All Surfaces Vehicle Interior Cleaner (500 ml)"
+        },
+        {
+          "sku": "VACB3",
+          "title": "VRPRIME Vacuum Storage Bags Set of 5 with Pump, Space Saving Travel Bags High Volume Storage Vacuum Bags, Travel Storage Vacuum Bags (Pack of 15)"
+        },
+        {
+          "sku": "VACB4",
+          "title": "VRPRIME Vacuum Storage Bags Set of 5 with Pump, Space Saving Travel Bags High Volume Storage Vacuum Bags, Travel Storage Vacuum Bags (Pack of 20)"
+        },
+        {
+          "sku": "CARN2",
+          "title": "VRPRIME Car Interior Cleaner Shine & Protect Spray | Dashboard, Seats, Leather & Plastic Surface Cleaner | Removes Dust, Dirt & Restores Shine Vehicle Interior Cleaner (1000 ml)"
+        },
+        {
+          "sku": "INTBOT-4",
+          "title": "VRPRIME Car Interior Cleaner Spray For Dashboard, Seats & All Interior Surfaces AC Vents Tough Stain Cleaner Vehicle Interior Cleaner (2000 ml)"
+        },
+        {
+          "sku": "INTERIOR-1",
+          "title": "VRPRIME Car Interior Cleaner Spray For Dashboard, Seats & All Interior Surfaces AC Vents Tough Stain Cleaner Vehicle Interior Cleaner (250 ml)"
+        },
+        {
+          "sku": "PLANT_G3",
+          "title": "VRPRIME Plant Growth Booster for Plants | Growth, Strong Roots & Healthy Leaves Soil (0.3 L, Liquid)"
+        }
+      ],
+      "alreadyInactive": [
+        "WARML3",
+        "Sh_ALLIN1",
+        "VACMAP2",
+        "WAIST11"
+      ],
+      "notFound": [],
+      "failed": []
+    }
+  }
 }
