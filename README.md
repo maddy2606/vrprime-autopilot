@@ -2,7 +2,7 @@
 
 Runs on GitHub every 30 minutes from **8:00 AM to 11:00 PM** India time, so your computer can be off. **Paused 11:00 PM – 8:00 AM**: no listings activated, no page update, no emails. It does three things for Flipkart Seller Hub:
 
-1. **Activates listings automatically.** Any listing in Seller Hub's *Inactive > Ready for Activation* tab is set to Active, with no approval step.
+1. **Activates Ready for Activation listings automatically.** Only SKUs that Seller Hub shows in *Inactive > Ready for Activation* are activated, with no approval step. Other inactive listings and archived listings are never touched.
 2. **Keeps a Flipkart Ads budget page**: [`BUDGET.md`](BUDGET.md). It shows the ad wallet, 7-day spend, days of spend left, and every campaign that is out of budget or running out. It refreshes every 30 minutes.
 3. **Emails you on Gmail** when a campaign goes out of budget. It also emails when the ad wallet gets low, when ads stop being read, and when listings were activated.
 
@@ -19,17 +19,18 @@ Runs on GitHub every 30 minutes from **8:00 AM to 11:00 PM** India time, so your
 
 | Part | Where it runs | How |
 |---|---|---|
-| Listing activation | GitHub Actions | Flipkart Seller API: finds every `INACTIVE` listing that isn't archived, sets `listing_status` to `ACTIVE`, then reads it back to confirm. |
+| Ready for Activation list | Chrome on your Mac, then GitHub | Flipkart's API can't tell that tab apart from other inactive listings. So the Mac reads the tab in Chrome and runs `ready-push.mjs`, which pushes the SKUs to `listings/ready.json`. |
+| Listing activation | GitHub Actions | Flipkart Seller API: sets `listing_status` to `ACTIVE` for **only the SKUs in `listings/ready.json`**, after checking with Flipkart that each one is really inactive and not archived. It then reads each one back to confirm. |
 | Ads budget | Chrome on your Mac, then GitHub | Flipkart Ads has **no API** for sellers. So `ads/read-ads.js` reads Seller Hub > Ads > Campaign Manager in Chrome, and `ads-push.mjs` pushes the result to `ads/latest.json`. |
 | Budget page + email | GitHub Actions | `run.mjs` turns `ads/latest.json` into `BUDGET.md` and `docs/index.html`, and sends the Gmail alert. |
 
 ### Listing activation rules
 
-- **Activated:** inactive and not archived. That is Seller Hub's *Ready for Activation* tab.
-- **Never touched:** archived listings, and SKUs in `activation.ignoreSkus` in `config.json`.
-- **Blocked listings:** the API also reports these as inactive. Flipkart refuses to activate them. The refusal reason is emailed once and shown on the budget page. That SKU is retried every 6 hours (`retryAfterFailureHours`), not every run.
-- ⚠️ **If you switch a listing off on purpose, it gets switched back on within 30 minutes.** To keep one off, add its SKU to `ignoreSkus`, or archive it in Seller Hub.
-- **The update call:** it sends Flipkart the listing exactly as Flipkart returned it, with only `listing_status` changed. Price, stock, packages, etc. are unchanged.
+- **Activated:** only SKUs in the latest Ready for Activation list from the Mac. The list must be under 90 minutes old (`readyMaxAgeMinutes`). With no list, or an old one, **nothing is activated**.
+- **Never touched:** any inactive listing that isn't in that tab, archived listings (even if listed), and SKUs in `activation.ignoreSkus`.
+- **Refused SKUs:** if Flipkart refuses one, the reason is emailed once, and it's retried every 6 hours only while it's still in the tab.
+- **Limit:** at most 50 listings per run (`maxPerRun`).
+- **To stop activation completely:** set `"enabled": false` under `activation` in `config.json`.
 
 ### When you get an email
 
@@ -40,7 +41,7 @@ Runs on GitHub every 30 minutes from **8:00 AM to 11:00 PM** India time, so your
 | ⚠️ Ads not being checked | No new ads reading for 75 minutes (`ads.staleMinutes`): the Mac is off, Chrome is closed, or Seller Hub signed out. |
 | ⚠️ Ads check failed | Chrome is signed out of Seller Hub, or the page didn't load. |
 | ✅ Listings activated | The SKUs that were just activated (turn off with `activation.emailWhenActivated: false`). |
-| ⚠️ Couldn't be activated | Flipkart refused a SKU, with Flipkart's reason. Sent once per SKU. |
+| ⚠️ Couldn't be activated | Flipkart refused a SKU from the Ready for Activation tab, with Flipkart's reason. Sent once per SKU. |
 
 ## Setup
 
@@ -56,13 +57,16 @@ In **Settings > Secrets and variables > Actions > New repository secret**:
 | `GMAIL_APP_PASSWORD` | A Gmail **app password** for that address (not your normal password). Create one at <https://myaccount.google.com/apppasswords>. 2-Step Verification must be on. |
 | `ALERT_EMAIL_TO` | *(optional)* Where alerts go, comma-separated. Defaults to `GMAIL_USER`. |
 
-### 2. Point the Mac's ads reader at this repo
+### 2. Mac: read the ads and the Ready for Activation tab
 
-The existing Claude scheduled task on your Mac, **Flipkart ads check (every 30 min)**, reads Seller Hub Ads in Chrome. It currently pushes to `business-watch` with `node ads-push.mjs '<json>'`. Clone this repo on the Mac next to `business-watch`, then edit that task's instructions and add one line after its existing push step:
+Clone this repo on the Mac next to `business-watch`. Then edit the Claude scheduled task **Flipkart ads check (every 30 min)** and add these steps after its existing ones:
 
-> Then also run `node ads-push.mjs '<the same JSON line>'` in the `vrprime-autopilot` folder.
-
-The JSON line that `ads/read-ads.js` returns is the same for both repos.
+> Then also run `node ads-push.mjs '<the same ads JSON line>'` in the `vrprime-autopilot` folder.
+>
+> Then open Seller Hub > Listings > Inactive and select the **Ready for Activation** tab. Collect the seller SKU ID of every listing in that tab, on every page. Then run in the `vrprime-autopilot` folder:
+> `node ready-push.mjs '{"ok":1,"skus":["SKU1","SKU2"]}'` (use `"skus":[]` when the tab is empty).
+> If Seller Hub is signed out, run `node ready-push.mjs '{"ok":0,"e":"signed_out"}'`. If the tab didn't load, use `"e":"page_not_loaded"` instead.
+> Don't click Activate or change anything in Seller Hub.
 
 ### 3. Test
 
@@ -97,5 +101,6 @@ The JSON line that `ads/read-ads.js` returns is the same for both repos.
 | `lib/page.mjs` | `BUDGET.md`, `docs/index.html`, and the alert email |
 | `lib/mail.mjs` | Sends mail through Gmail SMTP. No packages. |
 | `ads/read-ads.js`, `ads-push.mjs` | Run on the Mac: read Seller Hub Ads in Chrome and push to `ads/latest.json` |
+| `ready-push.mjs` | Runs on the Mac: pushes the Ready for Activation SKUs to `listings/ready.json` |
 | `config.json` | Ignore list, dry run, retry interval, alert thresholds |
 | `state/state.json` | What's been activated, refused, and alerted. Written by the workflow. |

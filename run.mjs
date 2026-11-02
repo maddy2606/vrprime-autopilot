@@ -36,13 +36,20 @@ if (inQuietHours(now, TZ, cfg.pausedHours) && env.FORCE_RUN !== '1' && !PREVIEW)
 /* 1. Listings */
 const actCfg = { enabled: true, emailWhenActivated: true, ...(cfg.activation || {}) };
 let act = null;
+const READY_FILE = join(ROOT, 'listings', 'ready.json');
+const ready = readJson(READY_FILE, null);
+const readyAgeMin = ready?.checkedAt ? (now - Date.parse(ready.checkedAt)) / 6e4 : null;
+const readyFresh = !!(ready && ready.ok !== false && Array.isArray(ready.skus) && readyAgeMin !== null && readyAgeMin <= (Number(actCfg.readyMaxAgeMinutes) || 90));
 if (!actCfg.enabled) act = { disabled: true };
-else {
+else if (!readyFresh) {
+  act = { noList: true, readyCheckedAt: ready?.checkedAt || null, readyError: ready && ready.ok === false ? ready.error : null };
+  log(`Listings: no fresh Ready for Activation list from the Mac (${ready?.checkedAt ? `last read ${ready.checkedAt}` : 'never read'}); nothing activated.`);
+} else {
   try {
     const client = createClient({ base: env.FLIPKART_API_BASE || undefined, appId: env.FLIPKART_APP_ID, appSecret: env.FLIPKART_APP_SECRET });
-    act = await runActivation({ client, state, cfg: { ...actCfg, dryRun: actCfg.dryRun || PREVIEW }, now, log });
+    act = await runActivation({ client, state, cfg: { ...actCfg, onlySkus: ready.skus, dryRun: actCfg.dryRun || PREVIEW }, now, log });
     state.activationFails = 0;
-    log(`Listings: ${act.inactive} inactive, ${act.archived} archived, ${act.ignored} ignored, ${act.waiting.length} waiting to retry; tried ${act.tried}, activated ${act.activated.length}${act.dryRun ? ' (dry run)' : ''}, failed ${act.failed.length}.`);
+    log(`Listings: Ready for Activation tab had ${act.listed} SKU(s) (read ${ready.checkedAt}); ${act.alreadyActive} already active, ${act.notFound} not found; ${act.inactive} inactive, ${act.archived} archived, ${act.ignored} ignored, ${act.waiting.length} waiting to retry; tried ${act.tried}, activated ${act.activated.length}${act.dryRun ? ' (dry run)' : ''}, failed ${act.failed.length}.`);
     for (const a of act.activated) log(`  ✓ ${a.sku}  ${a.title}`);
     for (const a of act.failed) log(`  ✗ ${a.sku}  ${a.error}`);
   } catch (e) {

@@ -28,13 +28,15 @@ function fakeClient(listings, { refuse = new Set(), batchError = false } = {}) {
   };
 }
 
-const cfg = { readOnlyFields: ['sku_id', 'product_title', 'product_url', 'archived_status'], retryAfterFailureHours: 6 };
+const cfg0 = { readOnlyFields: ['sku_id', 'product_title', 'product_url', 'archived_status'], retryAfterFailureHours: 6 };
+const cfg = { ...cfg0, onlySkus: ['A', 'B', 'C', 'D', 'X', ...Array.from({ length: 25 }, (_, i) => `S${i}`)] };
 
 test('activates inactive listings, leaves archived and ignored alone', async () => {
   const L = { A: listing('A'), B: listing('B', { archived_status: 'ARCHIVED' }), C: listing('C'), D: listing('D', { listing_status: 'ACTIVE' }) };
   const client = fakeClient(L);
   const state = {};
-  const s = await runActivation({ client, state, cfg: { ...cfg, ignoreSkus: ['C'] } });
+  const s = await runActivation({ client, state, cfg: { ...cfg, ignoreSkus: ['C'], onlySkus: ['A', 'B', 'C', 'D'] } });
+  assert.equal(s.alreadyActive, 1);
   assert.deepEqual(s.activated.map(a => a.sku), ['A']);
   assert.equal(s.archived, 1);
   assert.equal(s.ignored, 1);
@@ -105,4 +107,24 @@ test('buildPayload and isDue', () => {
   assert.equal(isDue(undefined, 0, 6), true);
   assert.equal(isDue({ lastFailAt: new Date(0).toISOString() }, 5 * 36e5, 6), false);
   assert.equal(isDue({ lastFailAt: new Date(0).toISOString() }, 6 * 36e5, 6), true);
+});
+
+test('only SKUs in the Ready for Activation list are touched', async () => {
+  const L = { A: listing('A'), OTHER: listing('OTHER'), GONE: undefined };
+  delete L.GONE;
+  const client = fakeClient(L);
+  const s = await runActivation({ client, state: {}, cfg: { ...cfg0, onlySkus: ['A', 'GONE'] } });
+  assert.deepEqual(s.activated.map(a => a.sku), ['A']);
+  assert.equal(s.notFound, 1);
+  assert.equal(L.OTHER.listing_status, 'INACTIVE', 'an inactive listing not in the tab stays inactive');
+  assert.deepEqual(Object.keys(client.updates[0]), ['A']);
+});
+
+test('no list means nothing is activated', async () => {
+  const L = { A: listing('A') };
+  const client = fakeClient(L);
+  await assert.rejects(runActivation({ client, state: {}, cfg: cfg0 }), /refusing/);
+  assert.equal(client.updates.length, 0);
+  const s = await runActivation({ client, state: {}, cfg: { ...cfg0, onlySkus: [] } });
+  assert.equal(s.tried, 0);
 });
