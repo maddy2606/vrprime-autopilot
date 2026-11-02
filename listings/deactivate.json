@@ -1,0 +1,5 @@
+{
+  "id": "undo-first-run-2026-11-02",
+  "why": "The first run activated inactive listings that may not have been in Ready for Activation. Set them back to inactive. Only SKUs that are ACTIVE right now are changed.",
+  "skus": ["CARIN1", "INTERIOR2", "VAC1", "VRVACX", "VACMAP1", "VACMAP3", "VACMAP4", "VACMAP5", "VACMAP6", "CARNZ", "VACB3", "VACB4", "CARN2", "INTBOT-4", "INTERIOR-1", "PLANT_G3", "WARML3", "Sh_ALLIN1", "VACMAP2", "WAIST11"]
+}

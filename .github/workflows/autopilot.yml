@@ -8,7 +8,7 @@ on:
   workflow_dispatch:          # "Run workflow" button
   push:
     branches: [main]
-    paths: ['ads/latest.json', 'listings/ready.json', 'config.json']   # Mac pushes start a run right away
+    paths: ['ads/latest.json', 'listings/ready.json', 'listings/deactivate.json', 'config.json']   # Mac pushes start a run right away
 
 permissions:
   contents: write             # to save the budget page and state back to the repo

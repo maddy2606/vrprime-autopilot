@@ -13,6 +13,7 @@ import { join } from 'node:path';
 import { ROOT, loadEnv, readJson, writeFile, inQuietHours, lastPauseEnd } from './lib/util.mjs';
 import { createClient } from './lib/flipkart.mjs';
 import { runActivation } from './lib/activate.mjs';
+import { runDeactivation } from './lib/deactivate.mjs';
 import { evaluateAds } from './lib/ads.mjs';
 import { renderMarkdown, renderHtml, alertEmail } from './lib/page.mjs';
 import { sendMail } from './lib/mail.mjs';
@@ -31,6 +32,28 @@ const log = (...a) => console.log(...a);
 if (inQuietHours(now, TZ, cfg.pausedHours) && env.FORCE_RUN !== '1' && !PREVIEW) {
   log(`Paused ${cfg.pausedHours.from}–${cfg.pausedHours.to} (${TZ}). Nothing done.`);
   process.exit(0);
+}
+
+/* 0. One-off deactivation request (listings/deactivate.json), done once per request id */
+const deact = readJson(join(ROOT, 'listings', 'deactivate.json'), null);
+const deactNotes = [];
+state.deactivations ||= {};
+if (deact && deact.id && Array.isArray(deact.skus) && !state.deactivations[deact.id]) {
+  try {
+    const client = createClient({ base: env.FLIPKART_API_BASE || undefined, appId: env.FLIPKART_APP_ID, appSecret: env.FLIPKART_APP_SECRET });
+    const r = PREVIEW ? { preview: true } : await runDeactivation({ client, skus: deact.skus, readOnlyFields: (cfg.activation || {}).readOnlyFields || [] });
+    if (!PREVIEW) {
+      state.deactivations[deact.id] = { at: new Date(now).toISOString(), ...r };
+      log(`Deactivation "${deact.id}": ${r.deactivated.length} set inactive, ${r.alreadyInactive.length} already inactive, ${r.notFound.length} not found, ${r.failed.length} failed.`);
+      for (const x of r.deactivated) log(`  ↓ ${x.sku}  ${x.title}`);
+      for (const x of r.failed) log(`  ✗ ${x.sku}  ${x.error}`);
+      const li = a => a.map(x => typeof x === 'string' ? x : x.sku).join(', ') || 'none';
+      deactNotes.push({ key: `deact:${deact.id}`, kind: 'info', subject: `↩️ ${r.deactivated.length} listings set back to inactive${r.failed.length ? `, ${r.failed.length} failed` : ''}`,
+        text: `Set back to inactive: ${li(r.deactivated)}. Already inactive: ${li(r.alreadyInactive)}.${r.notFound.length ? ` Not found: ${li(r.notFound)}.` : ''}${r.failed.length ? ` FAILED: ${r.failed.map(x => `${x.sku} (${x.error})`).join('; ')}.` : ''}` });
+    }
+  } catch (e) {
+    log(`Deactivation "${deact.id}" failed, will retry next run: ${e.message}`);
+  }
 }
 
 /* 1. Listings */
@@ -65,6 +88,7 @@ const { view: ads, alerts } = evaluateAds({ doc: adsDoc, state, cfg: { ...(cfg.a
 log(`Ads: read ${ads.checkedAt || 'never'}${ads.stale ? ' (stale)' : ''}; ${ads.outCount} out of budget, ${ads.nearCount} running out; ${alerts.length} new alert(s).`);
 
 // Three failed listing checks in a row (bad keys, Flipkart down) is worth an email, once.
+alerts.push(...deactNotes);
 if (state.activationFails === 3) alerts.push({ key: 'act_error', kind: 'act_error', text: `Listing auto-activation has failed 3 runs in a row: ${act.error}` });
 
 /* 3. Email */
@@ -94,15 +118,15 @@ if (mail && PREVIEW) {
   }
 }
 
-/* 4. Page + state */
-const actView = act && !act.error && !act.disabled
+/* 4. State (saved first, so a page problem can't lose it), then the page */
+state.lastRunAt = new Date(now).toISOString();
+if (!PREVIEW) writeFile(STATE_FILE, JSON.stringify(state, null, 2) + '\n');
+const actView = act && Array.isArray(act.activated)
   ? { ...act, activatedNow: act.activated.length, lastActivated: state.activationHistory || [], waiting: Object.entries(state.activation || {}).map(([sku, v]) => ({ sku, title: v.title, error: v.lastError })) }
   : act;
 const model = { ads, act: actView, runAt: now, tz: TZ };
 const out = PREVIEW ? join(ROOT, 'preview') : ROOT;
 writeFile(join(out, 'BUDGET.md'), renderMarkdown(model));
 writeFile(join(out, 'docs', 'index.html'), renderHtml(model));
-state.lastRunAt = new Date(now).toISOString();
-if (!PREVIEW) writeFile(STATE_FILE, JSON.stringify(state, null, 2) + '\n');
 log(PREVIEW ? 'Preview written to preview/.' : 'Budget page and state saved.');
 if (mailFailed) process.exit(1);
