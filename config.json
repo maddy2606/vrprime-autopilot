@@ -1,7 +1,9 @@
 {
   "timezone": "Asia/Kolkata",
-  "pausedHours": { "from": "23:00", "to": "08:00" },
-
+  "pausedHours": {
+    "from": "23:00",
+    "to": "08:00"
+  },
   "activation": {
     "enabled": true,
     "dryRun": false,
@@ -9,9 +11,18 @@
     "maxPerRun": 200,
     "retryAfterFailureHours": 6,
     "emailWhenActivated": true,
-    "readOnlyFields": ["sku_id", "listing_id", "product_title", "product_url", "archived_status", "created_at", "updated_at", "listing_status_reason", "errors"]
+    "readOnlyFields": [
+      "sku_id",
+      "listing_id",
+      "product_title",
+      "product_url",
+      "archived_status",
+      "created_at",
+      "updated_at",
+      "listing_status_reason",
+      "errors"
+    ]
   },
-
   "ads": {
     "staleMinutes": 75,
     "walletMinDays": 3,
