@@ -119,7 +119,7 @@
     "closedAt": {},
     "events": []
   },
-  "lastRunAt": "2026-11-02T14:36:34.007Z",
+  "lastRunAt": "2026-11-02T14:44:04.420Z",
   "deactivations": {
     "undo-first-run-2026-11-02": {
       "at": "2026-11-02T14:30:51.362Z",
@@ -200,12 +200,14 @@
     }
   },
   "lastEmail": {
-    "at": "2026-11-02T14:36:34.007Z",
+    "at": "2026-11-02T14:44:04.420Z",
     "ok": true,
+    "from": "vrprimeaman@gmail.com",
     "to": [
       "aman.stjames@gmail.com"
     ],
-    "subject": "✅ VRPRIME Autopilot: Gmail alerts are working"
+    "subject": "✅ VRPRIME Autopilot: Gmail alerts are working",
+    "gmailReceipt": "250 2.0.0 OK  1793630645 af79cd13be357-94425ac6bddsm850248385a.37 - gsmtp"
   },
-  "testEmailSent": "gmail-check-1"
+  "testEmailSent": "gmail-check-2"
 }
