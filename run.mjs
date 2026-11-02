@@ -6,9 +6,11 @@
 //
 //   node run.mjs            the real thing
 //   node run.mjs --preview  no listing changes, no email; writes the page to preview/
+//
+// Paused every night from 11:00 PM to 8:00 AM India time (config.json "pausedHours").
 
 import { join } from 'node:path';
-import { ROOT, loadEnv, readJson, writeFile } from './lib/util.mjs';
+import { ROOT, loadEnv, readJson, writeFile, inQuietHours, lastPauseEnd } from './lib/util.mjs';
 import { createClient } from './lib/flipkart.mjs';
 import { runActivation } from './lib/activate.mjs';
 import { evaluateAds } from './lib/ads.mjs';
@@ -23,6 +25,13 @@ const STATE_FILE = join(ROOT, 'state', 'state.json');
 const state = readJson(STATE_FILE, {});
 const now = Date.now();
 const log = (...a) => console.log(...a);
+
+// Paused overnight (config.json "pausedHours", India time): no activation, no page update, no email.
+// Pressing "Run workflow" by hand still runs (FORCE_RUN=1).
+if (inQuietHours(now, TZ, cfg.pausedHours) && env.FORCE_RUN !== '1' && !PREVIEW) {
+  log(`Paused ${cfg.pausedHours.from}–${cfg.pausedHours.to} (${TZ}). Nothing done.`);
+  process.exit(0);
+}
 
 /* 1. Listings */
 const actCfg = { enabled: true, emailWhenActivated: true, ...(cfg.activation || {}) };
@@ -45,7 +54,7 @@ else {
 
 /* 2. Ads */
 const adsDoc = readJson(join(ROOT, 'ads', 'latest.json'), null);
-const { view: ads, alerts } = evaluateAds({ doc: adsDoc, state, cfg: cfg.ads || {}, now });
+const { view: ads, alerts } = evaluateAds({ doc: adsDoc, state, cfg: { ...(cfg.ads || {}), pauseEndedAt: lastPauseEnd(now, TZ, cfg.pausedHours) }, now });
 log(`Ads: read ${ads.checkedAt || 'never'}${ads.stale ? ' (stale)' : ''}; ${ads.outCount} out of budget, ${ads.nearCount} running out; ${alerts.length} new alert(s).`);
 
 // Three failed listing checks in a row (bad keys, Flipkart down) is worth an email, once.

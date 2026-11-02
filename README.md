@@ -1,10 +1,19 @@
 # VRPRIME Autopilot
 
-Runs on GitHub every 30 minutes, so your computer can be off. It does three things for Flipkart Seller Hub:
+Runs on GitHub every 30 minutes from **8:00 AM to 11:00 PM** India time, so your computer can be off. **Paused 11:00 PM – 8:00 AM**: no listings activated, no page update, no emails. It does three things for Flipkart Seller Hub:
 
 1. **Activates listings automatically.** Any listing in Seller Hub's *Inactive > Ready for Activation* tab is set to Active, with no approval step.
 2. **Keeps a Flipkart Ads budget page**: [`BUDGET.md`](BUDGET.md). It shows the ad wallet, 7-day spend, days of spend left, and every campaign that is out of budget or running out. It refreshes every 30 minutes.
 3. **Emails you on Gmail** when a campaign goes out of budget. It also emails when the ad wallet gets low, when ads stop being read, and when listings were activated.
+
+## Overnight pause (11:00 PM – 8:00 AM)
+
+- **Schedule:** the first run is about 8:12 AM and the last about 10:42 PM IST (`.github/workflows/autopilot.yml`).
+- **Night pushes:** `run.mjs` and `ads-push.mjs` also check `pausedHours` in `config.json`, so a push from the Mac at night does nothing either.
+- **Manual runs:** **Actions > Autopilot > Run workflow** still works at night if you need it.
+- **Changing the hours:** edit `"pausedHours": { "from": "23:00", "to": "08:00" }` in `config.json` *and* the two cron lines in the workflow. Cron is in UTC, which is IST − 5:30.
+- **Morning email:** anything that happened overnight (a campaign out of budget, a listing ready for activation) is handled and emailed in the first run after 8 AM.
+- **No false morning alert:** the "ads not being checked" check only counts time since 8:00 AM.
 
 ## How it works
 
@@ -69,9 +78,9 @@ The JSON line that `ads/read-ads.js` returns is the same for both repos.
 
 ## Cost and limits
 
-- **Actions minutes:** each run takes under a minute, but GitHub rounds every run up to a whole minute. That's 48 runs a day, about **1,440 minutes a month**. `business-watch` already uses about the same. Together that's ~2,900 minutes. A free GitHub plan includes **2,000 minutes a month for private repos**. To stay inside that, do one of these:
+- **Actions minutes:** each run takes under a minute, but GitHub rounds every run up to a whole minute. With the overnight pause that's 30 runs a day, about **900 minutes a month**. `business-watch` already uses about 1,440. Together that's ~2,350 minutes. A free GitHub plan includes **2,000 minutes a month for private repos**. To stay inside that, do one of these:
   - upgrade to GitHub Pro (3,000 minutes);
-  - change the cron in `.github/workflows/autopilot.yml` to hourly (`12 * * * *`); ads alerts would still arrive within a minute or two, because a push from the Mac starts a run;
+  - run hourly instead: delete the second cron line (`12 3-17 * * *`) in `.github/workflows/autopilot.yml`; ads alerts would still arrive within a minute or two, because a push from the Mac starts a run;
   - turn off one of the two repos' schedules.
 - **Ads need the Mac.** Ads readings only happen while your Mac is on, Chrome is open, and Chrome is signed in to Seller Hub. When readings stop, you get the "Ads not being checked" email.
 - **Ads coverage:** the reader reads Flipkart's **Budget Exhausting** list: campaigns out of budget or close to it. Campaigns with plenty of budget left aren't listed.

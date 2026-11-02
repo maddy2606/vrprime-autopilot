@@ -1,5 +1,6 @@
 {
   "timezone": "Asia/Kolkata",
+  "pausedHours": { "from": "23:00", "to": "08:00" },
 
   "activation": {
     "enabled": true,

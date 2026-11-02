@@ -2,7 +2,9 @@ name: Autopilot
 
 on:
   schedule:
-    - cron: '12,42 * * * *'   # every 30 minutes (UTC), off the hour when GitHub is less busy
+    # Every 30 minutes from 8:12 AM to 10:42 PM India time (IST = UTC+5:30); paused 11 PM–8 AM.
+    - cron: '42 2-16 * * *'   # 8:12 AM … 10:12 PM IST
+    - cron: '12 3-17 * * *'   # 8:42 AM … 10:42 PM IST
   workflow_dispatch:          # "Run workflow" button
   push:
     branches: [main]
@@ -33,6 +35,7 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
           PAGE_URL: ${{ vars.PAGE_URL }}
+          FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
       - name: Save budget page and state
         if: always()
         run: |

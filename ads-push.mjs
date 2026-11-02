@@ -25,6 +25,17 @@ const ERRORS = {
   no_data: "The Budget Exhausting list didn't load in Seller Hub.",
 };
 
+// Paused overnight like the rest of Autopilot: nothing is pushed, so no GitHub run starts.
+{
+  const q = cfg.pausedHours, tz = cfg.timezone || 'Asia/Kolkata';
+  if (q && q.from && q.to) {
+    const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date()).map(x => [x.type, x.value]));
+    const t = Number(p.hour) * 60 + Number(p.minute), m = s => { const [h, mm] = s.split(':').map(Number); return h * 60 + (mm || 0); };
+    const a = m(q.from), b = m(q.to);
+    if (a <= b ? t >= a && t < b : t >= a || t < b) { console.log(`Paused ${q.from}–${q.to} (${tz}); not pushed.`); process.exit(0); }
+  }
+}
+
 let raw;
 try { raw = JSON.parse(process.argv[2] || ''); } catch { console.error('Pass the JSON line from ads/read-ads.js as the only argument.'); process.exit(2); }
 
