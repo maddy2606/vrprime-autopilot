@@ -93,7 +93,7 @@ if (state.activationFails === 3) alerts.push({ key: 'act_error', kind: 'act_erro
 
 /* 3. Email */
 const pageUrl = env.PAGE_URL || (env.GITHUB_REPOSITORY ? `https://github.com/${env.GITHUB_REPOSITORY}/blob/main/BUDGET.md` : '');
-const mail = alertEmail({
+let mail = alertEmail({
   alerts,
   ads,
   activation: act?.activated && !act.dryRun && actCfg.emailWhenActivated ? act.activated : [],
@@ -102,16 +102,32 @@ const mail = alertEmail({
   pageUrl,
 });
 let mailFailed = false;
+// One-time test email: change "testEmailId" in config.json to send another.
+const testId = cfg.testEmailId || null;
+const testDue = !!(testId && state.testEmailSent !== testId);
+if (testDue && !mail) {
+  mail = {
+    subject: '✅ VRPRIME Autopilot: Gmail alerts are working',
+    html: `<div style="font:15px/1.5 system-ui,sans-serif"><p>This is a test from <b>VRPRIME Autopilot</b> on GitHub. If you can read it, alerts reach this inbox.</p>
+<p>You'll get an email when a Flipkart campaign goes out of budget, the ad wallet gets low, the Mac stops reading ads or Seller Hub signs out, listings from Ready for Activation are activated or refused, or Autopilot keeps failing.</p>
+<p>Right now: ${ads.stale ? 'ads data is old (the Mac reader is off)' : `${ads.outCount} campaign(s) out of budget`}${ads.wallet ? `, ad wallet ₹${Number(ads.wallet.balance).toLocaleString('en-IN')}` : ''}.</p>
+<p style="color:#6b6b66;font-size:13px">${pageUrl ? `<a href="${pageUrl}">Budget page</a>` : ''}</p></div>`,
+  };
+}
+const recipients = [cfg.alertTo, env.ALERT_EMAIL_TO].filter(Boolean).join(',') || env.GMAIL_USER;
 if (mail && PREVIEW) {
   writeFile(join(ROOT, 'preview', 'email.html'), mail.html);
   log(`Email (preview only, not sent): ${mail.subject}`);
 } else if (mail) {
   try {
-    const to = await sendMail({ user: env.GMAIL_USER, pass: env.GMAIL_APP_PASSWORD, to: env.ALERT_EMAIL_TO || env.GMAIL_USER, subject: mail.subject, html: mail.html });
+    const to = await sendMail({ user: env.GMAIL_USER, pass: env.GMAIL_APP_PASSWORD, to: recipients, subject: mail.subject, html: mail.html });
     log(`Email sent to ${to.length} address(es): ${mail.subject}`);
+    state.lastEmail = { at: new Date(now).toISOString(), ok: true, to, subject: mail.subject };
+    if (testDue) state.testEmailSent = testId;
   } catch (e) {
     mailFailed = true;
     log(`Email NOT sent: ${e.message}`);
+    state.lastEmail = { at: new Date(now).toISOString(), ok: false, subject: mail.subject, error: e.message, senderSet: !!env.GMAIL_USER, passwordSet: !!env.GMAIL_APP_PASSWORD, passwordLength: String(env.GMAIL_APP_PASSWORD || '').replace(/\s/g, '').length };
     // Un-mark the ads problems so the next run tries the email again.
     for (const a of alerts) if (state.ads?.open) delete state.ads.open[a.key];
     if (state.activationFails === 3) state.activationFails = 2;
