@@ -119,7 +119,7 @@
     "closedAt": {},
     "events": []
   },
-  "lastRunAt": "2026-11-02T14:30:51.362Z",
+  "lastRunAt": "2026-11-02T14:36:34.007Z",
   "deactivations": {
     "undo-first-run-2026-11-02": {
       "at": "2026-11-02T14:30:51.362Z",
@@ -198,5 +198,14 @@
       "notFound": [],
       "failed": []
     }
-  }
+  },
+  "lastEmail": {
+    "at": "2026-11-02T14:36:34.007Z",
+    "ok": true,
+    "to": [
+      "aman.stjames@gmail.com"
+    ],
+    "subject": "✅ VRPRIME Autopilot: Gmail alerts are working"
+  },
+  "testEmailSent": "gmail-check-1"
 }
