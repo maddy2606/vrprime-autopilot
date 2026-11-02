@@ -1,0 +1,12 @@
+{
+  "name": "vrprime-autopilot",
+  "private": true,
+  "type": "module",
+  "description": "Auto-activates VRPRIME's Ready for Activation listings on Flipkart, keeps a Flipkart Ads budget page, and emails alerts when a campaign runs out of budget.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node run.mjs",
+    "preview": "node run.mjs --preview",
+    "test": "node --test test/*.test.mjs"
+  }
+}

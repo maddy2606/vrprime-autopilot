@@ -1,0 +1,19 @@
+{
+  "timezone": "Asia/Kolkata",
+
+  "activation": {
+    "enabled": true,
+    "dryRun": false,
+    "ignoreSkus": [],
+    "maxPerRun": 200,
+    "retryAfterFailureHours": 6,
+    "emailWhenActivated": true,
+    "readOnlyFields": ["sku_id", "listing_id", "product_title", "product_url", "archived_status", "created_at", "updated_at", "listing_status_reason", "errors"]
+  },
+
+  "ads": {
+    "staleMinutes": 75,
+    "walletMinDays": 3,
+    "realertHours": 6
+  }
+}

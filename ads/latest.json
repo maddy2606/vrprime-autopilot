@@ -1,0 +1,57 @@
+{
+  "checkedAt": "2026-11-01T05:09:00.471Z",
+  "ok": true,
+  "error": null,
+  "wallet": {
+    "balance": 3968085.22,
+    "spend7d": 542550,
+    "days": 7,
+    "dailySpend": 77507,
+    "daysLeft": 51.2,
+    "minDays": 3
+  },
+  "campaigns": [
+    {
+      "name": "DESCALER-1_Auto",
+      "remaining": 0,
+      "budget": 1000,
+      "budgetType": "daily",
+      "live": true,
+      "problem": "out_of_budget"
+    },
+    {
+      "name": "NEWLIZARD_1_Phrase - Rusty",
+      "remaining": 0,
+      "budget": 1000,
+      "budgetType": "daily",
+      "live": true,
+      "problem": "out_of_budget"
+    },
+    {
+      "name": "NEWCARPOLISH-1_Exact - Rusty",
+      "remaining": 0,
+      "budget": 2000,
+      "budgetType": "daily",
+      "live": true,
+      "problem": "out_of_budget"
+    },
+    {
+      "name": "Repellent_ROI",
+      "remaining": 0,
+      "budget": 10697.04,
+      "budgetType": "total",
+      "live": true,
+      "problem": "out_of_budget"
+    },
+    {
+      "name": "ROI_HSS",
+      "remaining": 0,
+      "budget": 2000,
+      "budgetType": "total",
+      "live": true,
+      "problem": "out_of_budget"
+    }
+  ],
+  "total": 5,
+  "pushedAt": "2026-11-01T05:09:00.471Z"
+}
