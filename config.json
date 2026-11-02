@@ -5,7 +5,7 @@
     "to": "08:00"
   },
   "activation": {
-    "enabled": true,
+    "enabled": false,
     "dryRun": false,
     "ignoreSkus": [],
     "maxPerRun": 200,
