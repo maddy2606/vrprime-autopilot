@@ -122,7 +122,7 @@ if (mail && PREVIEW) {
   try {
     const to = await sendMail({ user: env.GMAIL_USER, pass: env.GMAIL_APP_PASSWORD, to: recipients, subject: mail.subject, html: mail.html });
     log(`Email sent to ${to.length} address(es): ${mail.subject}`);
-    state.lastEmail = { at: new Date(now).toISOString(), ok: true, to, subject: mail.subject };
+    state.lastEmail = { at: new Date(now).toISOString(), ok: true, from: to.from, to: [...to], subject: mail.subject, gmailReceipt: to.receipt };
     if (testDue) state.testEmailSent = testId;
   } catch (e) {
     mailFailed = true;

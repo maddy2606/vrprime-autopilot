@@ -1,7 +1,7 @@
 {
   "timezone": "Asia/Kolkata",
   "alertTo": "aman.stjames@gmail.com",
-  "testEmailId": "gmail-check-1",
+  "testEmailId": "gmail-check-2",
   "pausedHours": {
     "from": "23:00",
     "to": "08:00"

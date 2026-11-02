@@ -33,9 +33,11 @@ test('sends a message through SMTP', async () => {
   const { server, got, port } = await fakeSmtp();
   const to = await sendMail({ user: 'me@gmail.com', pass: 'app pass', to: 'a@x.com, b@x.com', subject: '🔴 Out of budget: ROI_HSS', html: '<b>hi ₹</b>', connect: () => net.connect(port, '127.0.0.1') });
   server.close();
-  assert.deepEqual(to, ['a@x.com', 'b@x.com']);
+  assert.deepEqual([...to], ['a@x.com', 'b@x.com']);
+  assert.equal(to.from, 'me@gmail.com');
+  assert.match(to.receipt, /OK queued/);
   assert.ok(got.lines.includes('RCPT TO:<a@x.com>') && got.lines.includes('RCPT TO:<b@x.com>'));
-  assert.equal(Buffer.from(got.lines.find(l => l.startsWith('AUTH PLAIN')).slice(11), 'base64').toString(), '\0me@gmail.com\0app pass');
+  assert.equal(Buffer.from(got.lines.find(l => l.startsWith('AUTH PLAIN')).slice(11), 'base64').toString(), '\0me@gmail.com\0apppass', 'spaces in the app password are removed');
   assert.match(got.data, /Subject: =\?UTF-8\?B\?/);
   const body = got.data.split('\n\n').slice(1).join('').replace(/\n/g, '');
   assert.equal(Buffer.from(body, 'base64').toString(), '<b>hi ₹</b>');
