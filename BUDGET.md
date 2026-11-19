@@ -1,8 +1,8 @@
 # VRPRIME · Flipkart Ads budget
 
-**⚠️ Ads data is old (last read 17 days ago). The Mac reader may be off.**
+**⚠️ Ads data is old (last read 18 days ago). The Mac reader may be off.**
 
-Page updated 18 Nov, 5:01 pm (every 30 min). Ads data read 1 Nov, 10:39 am.
+Page updated 19 Nov, 4:13 pm (every 30 min). Ads data read 1 Nov, 10:39 am.
 
 ## Ad wallet
 
