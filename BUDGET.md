@@ -2,7 +2,7 @@
 
 **⚠️ Ads data is old (last read 24 days ago). The Mac reader may be off.**
 
-Page updated 25 Nov, 5:10 pm (every 30 min). Ads data read 1 Nov, 10:39 am.
+Page updated 25 Nov, 6:13 pm (every 30 min). Ads data read 1 Nov, 10:39 am.
 
 ## Ad wallet
 
